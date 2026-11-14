@@ -9,15 +9,21 @@ class ZeldaHUD
     @sprites["item_0"].z = 1001
     @sprites["item_1"] = IconSprite.new(144,Settings::ZELDA_SCREEN_HEIGHT,@viewport)
     @sprites["item_1"].z = 1001
-    @sprites["overlay"] = BitmapSprite.new(112, 32, @viewport)
-    @sprites["overlay"].x = 240
-    @sprites["overlay"].y = Settings::ZELDA_SCREEN_HEIGHT
-    @sprites["overlay"].z = 1001
-    @hearts = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/hearts")
+    @sprites["overlay_hp"] = BitmapSprite.new(128, 32, @viewport)
+    @sprites["overlay_hp"].x = 256
+    @sprites["overlay_hp"].y = Settings::ZELDA_SCREEN_HEIGHT
+    @sprites["overlay_hp"].z = 1001
+    @sprites["overlay_money_keys"] = BitmapSprite.new(48, 32, @viewport)
+    @sprites["overlay_money_keys"].x = 208
+    @sprites["overlay_money_keys"].y = Settings::ZELDA_SCREEN_HEIGHT
+    @sprites["overlay_money_keys"].z = 1001
+    @heart_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/hearts")
+    @key_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/key_icon")
+    @numbers_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/numbers")
   end
   
   def dispose
-    @hearts.dispose
+    @heart_bitmap.dispose
     pbDisposeSpriteHash(@sprites)
     @disposed = true
   end
@@ -27,7 +33,7 @@ class ZeldaHUD
     return true if @items != $PokemonGlobal.hud_tools
     return true if @maxhp != $PokemonGlobal.smeargle_hp_max
     return true if @hp != $PokemonGlobal.smeargle_hp_current
-    return true if @paint != $PokemonGlobal.current_paint_color && @items.any?(:brush)
+    return true if @keys != pbGetCurrentDungeon&.keys
     return false
   end
   
@@ -36,6 +42,7 @@ class ZeldaHUD
     @maxhp = $PokemonGlobal.smeargle_hp_max
     @hp = $PokemonGlobal.smeargle_hp_current
     @paint = $PokemonGlobal.current_paint_color
+    @keys = pbGetCurrentDungeon&.keys
     if $game_temp.game_over_time
       if !@game_over
         draw_hearts
@@ -66,15 +73,16 @@ class ZeldaHUD
       end
     end
     draw_hearts
+    draw_money_keys
   end
   
   def draw_hearts
-    overlay = @sprites["overlay"].bitmap
+    overlay = @sprites["overlay_hp"].bitmap
     overlay.clear
     max_hearts = @maxhp/4
     last_heart_progress = @hp % 4
     full_hearts = @hp/4
-    14.times do |i|
+    16.times do |i|
       index = 0
       if i<full_hearts
         index = 5
@@ -85,7 +93,27 @@ class ZeldaHUD
       end
       x = (i%7)*16
       y = (i/7)*16
-      overlay.blt(x,y,@hearts.bitmap,Rect.new(index*16,0,16,16))
+      overlay.blt(x,y,@heart_bitmap.bitmap,Rect.new(index*16,0,16,16))
+    end
+  end
+  
+  def draw_money_keys
+    overlay = @sprites["overlay_money_keys"].bitmap
+    overlay.clear
+    if @keys
+      overlay.blt(0,0,@key_bitmap.bitmap,@key_bitmap.bitmap.rect)
+      pbDrawNumber(@keys,overlay,32,0)
+    end
+  end
+  
+  def pbDrawNumber(number, btmp, startX, startY, align = :left)
+    n = number.to_i.digits.reverse
+    charWidth  = @numbers_bitmap.width / 10
+    charHeight = @numbers_bitmap.height
+    startX -= charWidth * n.length if align == :right
+    n.each do |i|
+      btmp.blt(startX, startY, @numbers_bitmap.bitmap, Rect.new(i * charWidth, 0, charWidth, charHeight))
+      startX += charWidth
     end
   end
   

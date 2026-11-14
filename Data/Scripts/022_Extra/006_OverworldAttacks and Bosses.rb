@@ -69,9 +69,10 @@ end
 class MinccinoMiniBoss
   HP = 2 * OverworldAttacks::FRACTIONS_PER_HEART
   
-  JUMP_POINTS = [[14,1,2],[15,1,2],
-                [11,3,6],[11,4,6],
-                [18,3,4],[18,4,4]]
+  JUMP_POINTS = [[28,1,2],[29,1,2],[30,1,2],[31,1,2],
+                 [25,3,6],[25,4,6],[25,5,6],
+                 [34,3,4],[34,4,4],[34,5,4]
+                ]
   
   def initialize(minccino)
     @boss_id = :Minccino
