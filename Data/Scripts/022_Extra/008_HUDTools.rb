@@ -1,5 +1,6 @@
 class PokemonGlobalMetadata
   attr_reader :hud_tools
+  attr_reader :inventory_tools
   attr_accessor :shooting
   attr_accessor :shielding
   
@@ -7,6 +8,7 @@ class PokemonGlobalMetadata
   def initialize
     _hudtools_initialize
     @hud_tools = [:brush,:protect]
+    @inventory_tools = Array.new(10)
     @shooting = false
     @shielding = false
   end

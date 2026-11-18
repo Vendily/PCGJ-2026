@@ -105,9 +105,9 @@ class Scene_Map
     $game_temp.in_menu = true
     $game_player.straighten
     $game_map.update
-    sscene = PokemonPauseMenu_Scene.new
-    sscreen = PokemonPauseMenu.new(sscene)
-    sscreen.pbStartPokemonMenu
+    sscene = ZeldaPause_Scene.new
+    sscreen = ZeldaPauseScreen.new(sscene)
+    sscreen.pbStartScreen
     $game_temp.in_menu = false
   end
 
@@ -214,7 +214,7 @@ class Scene_Map
     end
     if !$game_player.moving?
       if $game_temp.menu_calling
-        #call_menu
+        call_menu
         $game_temp.menu_calling = false
       elsif $game_temp.debug_calling
         call_debug

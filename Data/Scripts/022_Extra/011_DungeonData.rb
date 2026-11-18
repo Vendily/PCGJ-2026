@@ -73,5 +73,5 @@ end
 GameData::Dungeon.register({
   :id         => :GrassDungeon,
   :name       => _INTL("Grassy Grotto"),
-  :map_layout => Array.new(8*8,0)
+  :map_layout => Array.new(8*8,15)
 })

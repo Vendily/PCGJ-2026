@@ -17,9 +17,9 @@ class ZeldaHUD
     @sprites["overlay_money_keys"].x = 208
     @sprites["overlay_money_keys"].y = Settings::ZELDA_SCREEN_HEIGHT
     @sprites["overlay_money_keys"].z = 1001
-    @heart_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/hearts")
+    @heart_bitmap = AnimatedBitmap.new("Graphics/UI/hearts")
     @key_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/key_icon")
-    @numbers_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/numbers")
+    @numbers_bitmap = AnimatedBitmap.new("Graphics/UI/numbers")
   end
   
   def dispose
@@ -91,8 +91,8 @@ class ZeldaHUD
       elsif i<max_hearts
         index = 1
       end
-      x = (i%7)*16
-      y = (i/7)*16
+      x = (i%8)*16
+      y = (i/8)*16
       overlay.blt(x,y,@heart_bitmap.bitmap,Rect.new(index*16,0,16,16))
     end
   end
