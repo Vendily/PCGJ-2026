@@ -29,6 +29,8 @@ class DungeonData
   attr_accessor :boss_key
   attr_accessor :defeat_miniboss
   attr_accessor :defeat_boss
+  attr_accessor :has_map
+  attr_accessor :has_compass
   
   def initialize(id)
     @id = id
@@ -73,5 +75,12 @@ end
 GameData::Dungeon.register({
   :id         => :GrassDungeon,
   :name       => _INTL("Grassy Grotto"),
-  :map_layout => Array.new(8*8,15)
+  :map_layout => [nil,nil,4,nil,nil,nil,nil,nil,
+                  nil,nil,7,8,nil,nil,nil,nil,
+                  nil,nil,5,nil,2,12,nil,nil,
+                  nil,6,9,nil,2,15,12,nil,
+                  nil,5,2,12,nil,7,13,nil,
+                  nil,3,10,13,nil,7,9,nil,
+                  nil,nil,2,11,14,9,nil,nil,
+                  nil,nil,nil,nil,5,nil,nil,nil]
 })

@@ -33,6 +33,7 @@ class ZeldaHUD
     return true if @items != $PokemonGlobal.hud_tools
     return true if @maxhp != $PokemonGlobal.smeargle_hp_max
     return true if @hp != $PokemonGlobal.smeargle_hp_current
+    return true if @paint != $PokemonGlobal.current_paint_color
     return true if @keys != pbGetCurrentDungeon&.keys
     return false
   end

@@ -49,6 +49,17 @@ class ZeldaPause_Scene
     draw_money_keys
     draw_map
     
+    @sprites["map_cursor"] = Sprite.new(@viewport)
+    @sprites["map_cursor"].visible = !@dungeon_data.nil?
+    bitmaptmp = AnimatedBitmap.new("Graphics/UI/Pause Menu/icon_map_player")
+    bitmap = Bitmap.new(16, 16)
+    palette = Settings::SMEARGLE_PAINT_COLORS[@paint]
+    rawdata = bitmaptmp.bitmap.raw_data.bytes
+    bitmap.raw_data = PaintedBitmaps.paint_bitmap(rawdata,palette)
+    @sprites["map_cursor"].bitmap = bitmap
+    @sprites["map_cursor"].x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)*16 + 240
+    @sprites["map_cursor"].y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)*16 + 144
+    
     @cur_pos = 0
   end
   
