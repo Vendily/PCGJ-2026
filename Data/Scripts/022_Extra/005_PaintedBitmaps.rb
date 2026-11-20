@@ -4,14 +4,14 @@ module Settings
     [[252,250,252],[236,138,140],[172,38,36],[4,2,4]], # RED 
     [[252,250,252],[4,250,4],[76,138,4],[4,2,4]], # GREEN 
     [[252,250,252],[124,170,252],[4,50,252],[4,2,4]], # BLUE 
-    [[252,250,252],[244,254,4],[132,66,4],[4,2,4]] # YELLOW 
+    [[252,250,252],[244,254,4],[132,66,4],[4,2,4]],    # YELLOW 
+    [[252,234,228],[196,174,148],[148,122,76],[76,42,4]] # SEPIA
   ]
   SMEARGLE_PAINT_L_TO_R = 4
   SMEARGLE_PAINT_R_TO_L = 5
   SMEARGLE_PAINT_U_TO_D = 6
   SMEARGLE_PAINT_SMALL  = 7
   
-  SMEARGLE_PAINT_SEPIA_SWITCH = 100
   SMEARGLE_PAINT_HOLD_TIME = 1.5 #seconds
 end
 
@@ -36,9 +36,6 @@ end
 module PaintedBitmaps
   module_function
   def paint_bitmap(raw_data,palette)
-    if $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
-      palette = [[252,234,228],[196,174,148],[148,122,76],[76,42,4]]
-    end
     raw_data.map!.with_index do |b,i|
       c = i % 4
       if c == 3 # don't touch alpha

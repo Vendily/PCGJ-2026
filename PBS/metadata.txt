@@ -20,3 +20,4 @@ SwipeCharset = smeargle_paint
 ShootCharset = smeargle_shoot
 DeadCharset = smeargle_dead
 ShieldCharset = smeargle_shield
+ShowCharset = smeargle_display

@@ -23,6 +23,7 @@ module GameData
       "ShootCharset"    => [:shoot_charset,     "s"],
       "DeadCharset"     => [:dead_charset,      "s"],
       "ShieldCharset"   => [:shield_charset,    "s"],
+      "ShowCharset"     => [:show_charset,      "s"],
       "Home"            => [:home,              "vuuu"]
     }
 
@@ -43,7 +44,8 @@ module GameData
         ["SwipeCharset",    CharacterProperty,       _INTL("Charset used while the player is swinging their paint brush. Uses WalkCharset if undefined.")],
         ["ShootCharset",    CharacterProperty,       _INTL("Charset used while the player is shooting. Uses WalkCharset if undefined.")],
         ["DeadCharset",     CharacterProperty,       _INTL("Charset used while the player dies. Uses WalkCharset if undefined.")],
-        ["ShieldCharset",   CharacterProperty,       _INTL("Charset used while the player is shielding.Uses WalkCharset if undefined.")],
+        ["ShieldCharset",   CharacterProperty,       _INTL("Charset used while the player is shielding. Uses WalkCharset if undefined.")],
+        ["ShowCharset",     CharacterProperty,       _INTL("Charset used while the player is showing a pickup. Uses WalkCharset if undefined.")],
         ["Home",            MapCoordsFacingProperty, _INTL("Map ID and X/Y coordinates of where the player goes after a loss if no Pokémon Center was visited.")]
       ]
     end
@@ -70,6 +72,7 @@ module GameData
       @shoot_charset     = hash[:shoot_charset]
       @dead_charset      = hash[:dead_charset]
       @shield_charset    = hash[:shield_charset]
+      @show_charset      = hash[:show_charset]
       @home              = hash[:home]
       @pbs_file_suffix   = hash[:pbs_file_suffix] || ""
     end
@@ -112,6 +115,10 @@ module GameData
 
     def shield_charset
       return @shield_charset || @walk_charset
+    end
+    
+    def show_charset
+      return @show_charset || @walk_charset
     end
 
     alias __orig__get_property_for_PBS get_property_for_PBS unless method_defined?(:__orig__get_property_for_PBS)

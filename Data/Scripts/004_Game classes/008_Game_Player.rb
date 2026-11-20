@@ -91,6 +91,8 @@ class Game_Player < Game_Character
     when :ice_sliding
       self.move_speed = 4 if !@move_route_forcing
       new_charset = pbGetPlayerCharset(meta.walk_charset)
+    when :showing
+      new_charset = pbGetPlayerCharset(meta.show_charset)
     when :dead
       new_charset = pbGetPlayerCharset(meta.dead_charset)
     when :shielding

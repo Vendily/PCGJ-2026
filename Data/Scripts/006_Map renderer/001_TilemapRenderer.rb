@@ -103,7 +103,7 @@ class TilemapRenderer
     def set_src_rect(tile, tile_id)
       return if nil_or_empty?(tile.filename)
       return if !@bitmaps[tile.filename]
-      if tile.tile_paint || $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
+      if tile.tile_paint
         new_bitmap = Bitmap.new(SOURCE_TILE_WIDTH,SOURCE_TILE_HEIGHT)
         x = ((tile_id - TILESET_START_ID) % TILESET_TILES_PER_ROW) * SOURCE_TILE_WIDTH
         y = ((tile_id - TILESET_START_ID) / TILESET_TILES_PER_ROW) * SOURCE_TILE_HEIGHT
@@ -129,11 +129,7 @@ class TilemapRenderer
     end
 
     def apply_tile_paint(bitmap,tile_paint)
-      if $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
-        palette = nil
-      else
-        palette = Settings::SMEARGLE_PAINT_COLORS[tile_paint]
-      end
+      palette = Settings::SMEARGLE_PAINT_COLORS[tile_paint]
       rawdata = bitmap.raw_data.bytes
       bitmap.raw_data = PaintedBitmaps.paint_bitmap(rawdata,palette)
     end

@@ -49,13 +49,11 @@ class Sprite_Character < RPG::Sprite
     return if @tile_id == @character.tile_id &&
               @character_name == @character.character_name &&
               @character_hue == @character.character_hue &&
-              @character_paint == get_character_paint &&
-              @old_sepia == $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
+              @character_paint == get_character_paint
     @tile_id        = @character.tile_id
     @character_name = @character.character_name
     @character_hue  = @character.character_hue
     @character_paint = get_character_paint
-    @old_sepia = $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
     @charbitmap&.dispose
     @charbitmap = nil
     @ow_bitmap&.dispose
@@ -90,17 +88,13 @@ class Sprite_Character < RPG::Sprite
       b = @charbitmapAnimated ? @charbitmap.bitmap : @charbitmap
       @ow_bitmap = Bitmap.new(@charbitmap.width,@charbitmap.height)
       @ow_bitmap.blt(0, 0, b,@ow_bitmap.rect)
-      apply_event_color(@ow_bitmap) if @character_paint || @old_sepia
+      apply_event_color(@ow_bitmap) if @character_paint
     end
     @character.sprite_size = [@cw, @ch]
   end
   
   def apply_event_color(bitmap)
-    if $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
-      palette = nil
-    else
-      palette = Settings::SMEARGLE_PAINT_COLORS[@character_paint]
-    end
+    palette = Settings::SMEARGLE_PAINT_COLORS[@character_paint]
     rawdata = bitmap.raw_data.bytes
     bitmap.raw_data = PaintedBitmaps.paint_bitmap(rawdata,palette)
   end
@@ -113,7 +107,7 @@ class Sprite_Character < RPG::Sprite
     @charbitmap.update if @charbitmapAnimated
     if @charbitmapAnimated
       @ow_bitmap.blt(0, 0, @charbitmap.bitmap,@ow_bitmap.rect)
-      apply_event_color(@ow_bitmap) if @character_paint || $game_switches[Settings::SMEARGLE_PAINT_SEPIA_SWITCH]
+      apply_event_color(@ow_bitmap) if @character_paint
     end
     self.bitmap = @ow_bitmap
     if $game_temp.game_over_time

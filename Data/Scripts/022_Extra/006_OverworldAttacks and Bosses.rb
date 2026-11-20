@@ -23,6 +23,7 @@ module OverworldAttacks
     return if $game_temp.game_over_time
     return if $PokemonGlobal.smeargle_hp_current <= 0
     return if $game_temp.temp_invuln
+    return if $game_system.map_interpreter.running?
     $game_player.animation_id = 8
     $game_temp.temp_invuln = System.uptime
     $PokemonGlobal.smeargle_hp_current -= damage
@@ -47,11 +48,27 @@ module OverworldAttacks
   end
 end
 module BossController
-  def self.report_defeat(boss_id)
+  def self.report_defeat(boss_id,mini=false)
+    dungeon_data = pbGetCurrentDungeon
+    return unless dungeon_data
+    if mini
+      dungeon_data.defeat_miniboss = true
+    else
+      dungeon_data.defeat_boss = true
+    end
+    $game_map.need_refresh = true
   end
 end
 
-def pbGetEventAtCoordinate(x,y,include_player=false)
+def boss_defeated?
+  return pbGetCurrentDungeon&.defeat_boss
+end
+
+def miniboss_defeated?
+  return pbGetCurrentDungeon&.defeat_miniboss
+end
+
+def pbGetEventAtCoordinate(x,y,include_player=false,ignoreInterpreter=false)
   return nil if $game_system.map_interpreter.running? && !ignoreInterpreter
   return nil if !$game_map.valid?(x,y)
   if include_player
@@ -147,7 +164,7 @@ class MinccinoMiniBoss
   end
   
   def report_defeat
-    BossController.report_defeat(@boss_id)
+    BossController.report_defeat(@boss_id,true)
   end
 end
 

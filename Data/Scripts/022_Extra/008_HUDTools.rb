@@ -7,7 +7,7 @@ class PokemonGlobalMetadata
   alias _hudtools_initialize initialize
   def initialize
     _hudtools_initialize
-    @hud_tools = [:brush,:protect]
+    @hud_tools = [:brush,nil]
     @inventory_tools = Array.new(10)
     @shooting = false
     @shielding = false
@@ -18,12 +18,87 @@ class PokemonGlobalMetadata
   end
 end
 
+def pbGiveTool(tool)
+  tool = GameData::Tool.get(tool)
+  return false if !tool
+  ret = false
+  index = nil
+  $PokemonGlobal.hud_tools.each_with_index do |t,i|
+    next if t
+    index = i
+    break
+  end
+  if index
+    ret = true    
+  else
+    $PokemonGlobal.inventory_tools.each_with_index do |t,i|
+      next if t
+      index = i + 2
+      break
+    end
+    ret = true if index
+  end
+  if ret
+    anim = PickupAnimation.new($game_player,sprintf("pickup_%s",tool.id),Spriteset_Map.viewport)
+    $scene.spriteset.addUserSprite(anim)
+    $game_player.set_movement_type(:showing)
+    pbMEPlay("Key item get")
+    pbWait(2.0)
+    anim.dispose
+    if index>=2
+      $PokemonGlobal.inventory_tools[index - 2] = tool.id
+    else
+      $PokemonGlobal.hud_tools[index] = tool.id
+    end
+    $game_player.set_movement_type(:walking)
+  end
+  return ret
+end
+
 class Game_Temp
   attr_accessor :tool_back_calling
   attr_accessor :tool_back_held
   attr_accessor :tool_use_calling
   attr_accessor :tool_use_held
   attr_accessor :paint_change_calling
+end
+
+class PickupAnimation
+  def initialize(event,  filename, viewport = nil, map = nil)
+    @pickup = IconSprite.new(0, 0, viewport)
+    @pickup.setBitmap("Graphics/Pictures/pickups/" + filename)
+    @pickup.z = 1000
+    @pickup.ox = @pickup.bitmap.width / 2
+    @pickup.oy = @pickup.bitmap.height / 2
+    @event = event
+    @map = (map) ? map : $game_map
+    @disposed = false
+  end
+
+  def disposed?
+    return @disposed
+  end
+
+  def dispose
+    @pickup.dispose
+    @map = nil
+    @pickup = nil
+    @disposed = true
+  end
+
+  def update
+    return if !@pickup || !@event
+    @pickup.update
+    if (Object.const_defined?(:ScreenPosHelper) rescue false)
+      @pickup.x      = ScreenPosHelper.pbScreenX(@event)
+      @pickup.y      = ScreenPosHelper.pbScreenY(@event) - (Game_Map::TILE_HEIGHT)
+      @pickup.zoom_x = ScreenPosHelper.pbScreenZoomX(@event)
+      @pickup.zoom_y = @pickup.zoom_x
+    else
+      @pickup.x = @event.screen_x
+      @pickup.y = @event.screen_y - (Game_Map::TILE_HEIGHT)
+    end
+  end
 end
 
 module GameData
