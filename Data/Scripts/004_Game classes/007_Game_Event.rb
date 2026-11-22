@@ -25,6 +25,9 @@ class Game_Event < Game_Character
     @to_update    = true
     @tempSwitches = {}
     moveto(@event.x, @event.y) if map
+    if @event.name[/enemy\((\d+)\)/i]
+      setVariable($~[1].to_i)
+    end
     refresh
   end
 
@@ -245,6 +248,13 @@ class Game_Event < Game_Character
     return @to_update if !recalc
     return true if @updated_last_frame
     return true if @trigger && (@trigger == 3 || @trigger == 4)
+    if @event.name[/enemy/i]
+      enemy_screen_x = @original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      enemy_screen_y = @original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      player_screen_x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      player_screen_y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      return false if enemy_screen_x != player_screen_x || enemy_screen_y != player_screen_y
+    end
     return true if @move_route_forcing || @moveto_happened
     return true if @event.name[/update/i] || @event.name[/boss/i]
     range = 2   # Number of tiles
@@ -272,6 +282,15 @@ class Game_Event < Game_Character
     if @interpreter
       @interpreter.setup(@list, @event.id, @map_id) if !@interpreter.running?
       @interpreter.update
+    end
+    if @event.name[/enemy/i]
+      enemy_screen_x = @original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      enemy_screen_y = @original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      player_screen_x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      player_screen_y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      if enemy_screen_x != player_screen_x || enemy_screen_y != player_screen_y
+        moveto(@original_x,@original_y) if @x != @original_x || @y != @original_y
+      end
     end
   end
 =begin

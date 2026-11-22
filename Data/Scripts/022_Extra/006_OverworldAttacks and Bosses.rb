@@ -39,7 +39,16 @@ module OverworldAttacks
     if $game_temp.boss_controller&.check_player_attack?(event)
       $game_temp.boss_controller.register_hit(event,weapon)
     else
-      #nop
+      damage = case weapon
+               when :brush then 4
+               when :bullet_seed then 1
+               else 0
+               end
+      hp = event.variable
+      hp=[hp-damage,0].max
+      event.setVariable(hp)
+      event.animation_id = 9
+      event.erase if hp<=0
     end
   end
   def is_valid_weapon_target?(event)
