@@ -144,7 +144,7 @@ class ZeldaPause_Scene
   end
   
   def draw_map
-    return unless @dungeon_data
+    return unless @dungeon_data&.has_map
     overlay = @sprites["overlay"].bitmap
     map_layout = GameData::Dungeon.get(@dungeon_data.id).map_layout
     map_layout.each_with_index do |t,i|
@@ -158,7 +158,7 @@ class ZeldaPause_Scene
     end
   end
 
-  def pbTrainerCard
+  def pbMidScene
     pbSEPlay("GUI trainer card open")
     loop do
       Graphics.update
@@ -244,7 +244,7 @@ class ZeldaPauseScreen
 
   def pbStartScreen
     @scene.pbStartScene
-    @scene.pbTrainerCard
+    @scene.pbMidScene
     @scene.pbEndScene
   end
 end

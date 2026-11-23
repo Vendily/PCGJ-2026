@@ -18,12 +18,14 @@ end
 module OverworldAttacks
   INVULNERABILITY_TIME = 1.0 # seconds
   FRACTIONS_PER_HEART = 4
+  DISABLE_DAMAGE_SWITCH = 54
+  
   module_function
   def report_player_hit(damage)
     return if $game_temp.game_over_time
     return if $PokemonGlobal.smeargle_hp_current <= 0
     return if $game_temp.temp_invuln
-    return if $game_system.map_interpreter.running?
+    return if $game_switches[DISABLE_DAMAGE_SWITCH]
     $game_player.animation_id = 8
     $game_temp.temp_invuln = System.uptime
     $PokemonGlobal.smeargle_hp_current -= damage
@@ -48,7 +50,10 @@ module OverworldAttacks
       hp=[hp-damage,0].max
       event.setVariable(hp)
       event.animation_id = 9
-      event.erase if hp<=0
+      if hp<=0
+        event.erase
+        $game_map.need_refresh = true
+      end
     end
   end
   def is_valid_weapon_target?(event)
@@ -75,6 +80,18 @@ end
 
 def miniboss_defeated?
   return pbGetCurrentDungeon&.defeat_miniboss
+end
+
+def room_cleared?(event)
+  screen_x = event.original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+  screen_y = event.original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+  enemies_in_room = event.map.events.values.select do |e|
+    next false unless e.name[/enemy/]
+    sx = e.original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+    sy = e.original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+    next sx == screen_x && sy == screen_y
+  end
+  return enemies_in_room.all?{|e| e.variable<=0 || e.erased?}
 end
 
 def pbGetEventAtCoordinate(x,y,include_player=false,ignoreInterpreter=false)

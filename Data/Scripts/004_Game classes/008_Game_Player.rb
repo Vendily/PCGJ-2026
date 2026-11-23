@@ -349,6 +349,7 @@ class Game_Player < Game_Character
       next if !triggers.include?(event.trigger)
       # If starting determinant is same position event (other than jumping)
       next if event.jumping? || !event.over_trigger?
+      next if OverworldAttacks.is_valid_weapon_target?(event)
       event.start
       result = true
     end
@@ -371,6 +372,7 @@ class Game_Player < Game_Character
       next if !event.at_coordinate?(new_x, new_y)
       # If starting determinant is front event (other than jumping)
       next if event.jumping? || event.over_trigger?
+      next if OverworldAttacks.is_valid_weapon_target?(event)
       event.start
       result = true
     end
@@ -387,6 +389,7 @@ class Game_Player < Game_Character
         next if !event.at_coordinate?(new_x, new_y)
         # If starting determinant is front event (other than jumping)
         next if event.jumping? || event.over_trigger?
+        next if OverworldAttacks.is_valid_weapon_target?(event)
         event.start
         result = true
       end
@@ -414,6 +417,12 @@ class Game_Player < Game_Character
       end
       # If starting determinant is front event (other than jumping)
       next if event.jumping? || event.over_trigger?
+      if self.name[/enemy/i]
+      self.name[/damage\((\d+)\)/i]
+        damage = $~[1].to_i
+        OverworldAttacks.report_player_hit(2)
+        next
+      end
       event.start
       result = true
     end

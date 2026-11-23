@@ -50,6 +50,8 @@ class Game_Event < Game_Character
     @erased = true
     refresh
   end
+  
+  def erased?; @erased; end
 
   def erase_route
     @route_erased = true
@@ -167,6 +169,12 @@ class Game_Event < Game_Character
     end
     return if !in_line_with_coordinate?($game_player.x, $game_player.y)
     return if jumping? || over_trigger?
+    if self.name[/enemy/i]
+      self.name[/damage\((\d+)\)/i]
+      damage = $~[1].to_i
+      OverworldAttacks.report_player_hit(2)
+      return
+    end
     start
   end
 

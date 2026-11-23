@@ -18,6 +18,26 @@ class PokemonGlobalMetadata
   end
 end
 
+def pbGivePickup(pickup)
+  anim = PickupAnimation.new($game_player,sprintf("pickup_%s",pickup),Spriteset_Map.viewport)
+  $scene.spriteset.addUserSprite(anim)
+  $game_player.set_movement_type(:showing)
+  pbMEPlay("Key item get")
+  pbWait(2.0)
+  anim.dispose
+  case pickup
+  when :key
+    pbGetCurrentDungeon.keys+=1
+  when :boss_key
+    pbGetCurrentDungeon.boss_key = true
+  when :compass
+    pbGetCurrentDungeon.has_compass = true
+  when :map
+    pbGetCurrentDungeon.has_map = true
+  end
+  $game_player.set_movement_type(:walking)
+end
+
 def pbGiveTool(tool)
   tool = GameData::Tool.get(tool)
   return false if !tool
@@ -80,7 +100,7 @@ class PickupAnimation
   end
 
   def dispose
-    @pickup.dispose
+    @pickup&.dispose
     @map = nil
     @pickup = nil
     @disposed = true
