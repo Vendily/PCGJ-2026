@@ -29,8 +29,8 @@ class DungeonData
   attr_accessor :boss_key
   attr_accessor :defeat_miniboss
   attr_accessor :defeat_boss
-  attr_accessor :has_map
-  attr_accessor :has_compass
+  attr_accessor :map
+  attr_accessor :compass
   
   def initialize(id)
     @id = id

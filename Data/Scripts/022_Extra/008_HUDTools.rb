@@ -31,9 +31,9 @@ def pbGivePickup(pickup)
   when :boss_key
     pbGetCurrentDungeon.boss_key = true
   when :compass
-    pbGetCurrentDungeon.has_compass = true
+    pbGetCurrentDungeon.compass = true
   when :map
-    pbGetCurrentDungeon.has_map = true
+    pbGetCurrentDungeon.map = true
   end
   $game_player.set_movement_type(:walking)
 end

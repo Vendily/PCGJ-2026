@@ -48,6 +48,7 @@ class ZeldaPause_Scene
     draw_hearts
     draw_money_keys
     draw_map
+    draw_key_items
     
     @sprites["map_cursor"] = Sprite.new(@viewport)
     @sprites["map_cursor"].visible = !@dungeon_data.nil?
@@ -144,7 +145,7 @@ class ZeldaPause_Scene
   end
   
   def draw_map
-    return unless @dungeon_data&.has_map
+    return unless @dungeon_data&.map
     overlay = @sprites["overlay"].bitmap
     map_layout = GameData::Dungeon.get(@dungeon_data.id).map_layout
     map_layout.each_with_index do |t,i|
@@ -155,6 +156,27 @@ class ZeldaPause_Scene
       sx = (src_i%4)*16
       sy = (src_i/4)*16
       overlay.blt(dx,dy,@map_bitmap.bitmap,Rect.new(sx,sy,16,16))
+    end
+  end
+  
+  def draw_key_items
+    if @dungeon_data
+      overlay = @sprites["overlay"].bitmap
+      img_pos = []
+      if @dungeon_data.compass
+        img_pos.push(["Graphics/UI/Pause Menu/icon_compass",208,96])
+      end
+      if @dungeon_data.map
+        img_pos.push(["Graphics/UI/Pause Menu/icon_map",250,96])
+      end
+      if @dungeon_data.boss_key
+        img_pos.push(["Graphics/UI/Pause Menu/icon_boss_key",294,96])
+      end
+      if @dungeon_data.keys > 0
+        img_pos.push(["Graphics/UI/Pause Menu/icon_keys",336,96])
+      end
+      pbDrawImagePositions(overlay,img_pos)
+      pbDrawNumber(@dungeon_data.keys,overlay,352,112) if @dungeon_data.keys>0
     end
   end
 
