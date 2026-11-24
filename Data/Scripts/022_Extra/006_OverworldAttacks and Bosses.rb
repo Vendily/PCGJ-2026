@@ -86,7 +86,7 @@ def room_cleared?(event)
   screen_x = event.original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
   screen_y = event.original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
   enemies_in_room = event.map.events.values.select do |e|
-    next false unless e.name[/enemy/]
+    next false unless e.name[/enemy/i]
     sx = e.original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
     sy = e.original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
     next sx == screen_x && sy == screen_y
@@ -94,15 +94,29 @@ def room_cleared?(event)
   return enemies_in_room.all?{|e| e.variable<=0 || e.erased?}
 end
 
+EventHandlers.add(:on_screen_change,:reset_enemy_locations,
+  proc { |last_screen_x,last_screen_y,intended_screen_x,intended_screen_y,started|
+    next if started
+    $game_map.events.each_value do |e|
+      next unless e.name[/enemy/i]
+      sx = e.original_x * Game_Map::REAL_RES_X - (e.original_x * Game_Map::REAL_RES_X % (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
+      sy = e.original_y * Game_Map::REAL_RES_Y - (e.original_y * Game_Map::REAL_RES_Y % (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
+      if (e.x != e.original_x || e.y != e.original_y) && (sx != intended_screen_x || sy != intended_screen_y)
+        e.moveto(e.original_x,e.original_y)
+      end
+    end
+  }
+)
+
 def pbGetEventAtCoordinate(x,y,include_player=false,ignoreInterpreter=false)
   return nil if $game_system.map_interpreter.running? && !ignoreInterpreter
   return nil if !$game_map.valid?(x,y)
   if include_player
     return $game_player if $game_player.x == x && $game_player.y == y
   end
-  for event in $game_map.events.values
+  $game_map.events.each_value do |event| 
     next if !event.at_coordinate?(x,y)
-    next if event.character_name == ""
+    next if event.character_name == "" && event.tile_id<=0
     next if event.jumping?
     return event
   end

@@ -27,6 +27,7 @@ class Game_Player
         $game_temp.scrolling_map_transition = true
         $game_temp.scrolling_map_start = System.uptime
         $game_temp.scrolling_map_screen_xy = [last_screen_x,last_screen_y]
+        EventHandlers.trigger(:on_screen_change,last_screen_x,last_screen_y,intended_screen_x,intended_screen_y,true)
       else
         self.map.display_x = @real_x - (@real_x %  (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
         self.map.display_y = @real_y - (@real_y %  (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
@@ -43,6 +44,10 @@ class Game_Player
   def update_command_new
     if $game_temp.scrolling_map_transition
       if (System.uptime - $game_temp.scrolling_map_start) >= Settings::ZELDA_SCROLL_DURATION
+        intended_screen_x = @x * Game_Map::REAL_RES_X - (@x * Game_Map::REAL_RES_X % (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
+        intended_screen_y = @y * Game_Map::REAL_RES_Y - (@y * Game_Map::REAL_RES_Y % (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
+        last_screen_x, last_screen_y = $game_temp.scrolling_map_screen_xy
+        EventHandlers.trigger(:on_screen_change,last_screen_x,last_screen_y,intended_screen_x,intended_screen_y,false)
         $game_temp.scrolling_map_transition = false
         $game_temp.scrolling_map_start = nil
         $game_temp.scrolling_map_screen_xy = nil

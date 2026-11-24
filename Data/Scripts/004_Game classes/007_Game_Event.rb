@@ -312,4 +312,15 @@ class Game_Event < Game_Character
   end
 =end
 
+  def update_command
+    if @event.name[/enemy/i]
+      enemy_screen_x = @original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      enemy_screen_y = @original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      player_screen_x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      player_screen_y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      return if enemy_screen_x != player_screen_x || enemy_screen_y != player_screen_y
+    end
+    super
+  end
+
 end

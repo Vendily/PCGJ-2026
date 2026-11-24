@@ -101,6 +101,10 @@ class BulletSeedSprite
         @event = pbGetEventAtCoordinate(@start_x,@start_y)
         if OverworldAttacks.is_valid_weapon_target?(@event)
           OverworldAttacks.report_player_attack(@event,:bullet_seed)
+        elsif @event && @event.name[/seed_switch/i]
+          key = [@event.map_id, @event.id,'A']
+          $game_self_switches[key] = true
+          $game_map.need_refresh = true
         end
       else # enemy using seeds
         if $game_player.x == @start_x && $game_player.y == @start_y
