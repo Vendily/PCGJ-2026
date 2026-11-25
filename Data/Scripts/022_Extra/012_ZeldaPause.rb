@@ -43,6 +43,7 @@ class ZeldaPause_Scene
     @key_bitmap = AnimatedBitmap.new("Graphics/UI/ZeldaHUD/key_icon")
     @numbers_bitmap = AnimatedBitmap.new("Graphics/UI/numbers")
     @map_bitmap = AnimatedBitmap.new("Graphics/UI/Pause Menu/tiles_map")
+    @chest_bitmap = AnimatedBitmap.new("Graphics/UI/Pause Menu/icon_map_chest")
     
     @sprites["overlay"] = BitmapSprite.new(Graphics.width, Graphics.height, @viewport)
     draw_hearts
@@ -145,17 +146,29 @@ class ZeldaPause_Scene
   end
   
   def draw_map
-    return unless @dungeon_data&.map
+    return unless @dungeon_data
     overlay = @sprites["overlay"].bitmap
-    map_layout = GameData::Dungeon.get(@dungeon_data.id).map_layout
-    map_layout.each_with_index do |t,i|
-      next unless t
-      dx = (i%8)*16 + 240
-      dy = (i/8)*16 + 144
-      src_i = MAP_WANG_TILES.index(t)
-      sx = (src_i%4)*16
-      sy = (src_i/4)*16
-      overlay.blt(dx,dy,@map_bitmap.bitmap,Rect.new(sx,sy,16,16))
+    if @dungeon_data.map
+      map_layout = GameData::Dungeon.get(@dungeon_data.id).map_layout
+      map_layout.each_with_index do |t,i|
+        next unless t
+        dx = (i%8)*16 + 240
+        dy = (i/8)*16 + 144
+        src_i = MAP_WANG_TILES.index(t)
+        sx = (src_i%4)*16
+        sy = (src_i/4)*16
+        overlay.blt(dx,dy,@map_bitmap.bitmap,Rect.new(sx,sy,16,16))
+      end
+    end
+    if @dungeon_data.compass
+      $game_map.events.each_value do |e|
+        next unless e.name[/chest/i]
+        key = [e.map_id, e.id, 'B']
+        next if $game_self_switches[key]
+        dx = e.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)*16 + 240
+        dy = e.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)*16 + 144
+        overlay.blt(dx,dy,@chest_bitmap.bitmap,Rect.new(0,0,16,16))
+      end
     end
   end
   

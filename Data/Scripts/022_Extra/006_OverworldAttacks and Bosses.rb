@@ -95,11 +95,20 @@ def room_cleared?(event)
   return enemies_in_room.all?{|e| e.variable<=0 || e.erased?}
 end
 
+def resetable_event?(list)
+  return false unless list
+  list.each do |cmd|
+    next if cmd.code != 108
+    return true if cmd.parameters[0][/reset_pos/i]
+  end
+  return false
+end
+
 EventHandlers.add(:on_screen_change,:reset_enemy_locations,
   proc { |last_screen_x,last_screen_y,intended_screen_x,intended_screen_y,started|
     next if started
     $game_map.events.each_value do |e|
-      next unless e.name[/enemy/i]
+      next unless e.name[/enemy/i] || resetable_event?(e.list)
       sx = e.original_x * Game_Map::REAL_RES_X - (e.original_x * Game_Map::REAL_RES_X % (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
       sy = e.original_y * Game_Map::REAL_RES_Y - (e.original_y * Game_Map::REAL_RES_Y % (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
       if (e.x != e.original_x || e.y != e.original_y) && (sx != intended_screen_x || sy != intended_screen_y)
