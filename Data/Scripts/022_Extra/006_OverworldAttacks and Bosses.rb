@@ -21,11 +21,12 @@ module OverworldAttacks
   DISABLE_DAMAGE_SWITCH = 54
   
   module_function
-  def report_player_hit(damage)
+  def report_player_hit(damage,dir=nil)
     return if $game_temp.game_over_time
     return if $PokemonGlobal.smeargle_hp_current <= 0
     return if $game_temp.temp_invuln
     return if $game_switches[DISABLE_DAMAGE_SWITCH]
+    return if dir && $PokemonGlobal.shielding && ((10-dir) == $game_player.direction)
     $game_player.animation_id = 8
     $game_temp.temp_invuln = System.uptime
     $PokemonGlobal.smeargle_hp_current -= damage

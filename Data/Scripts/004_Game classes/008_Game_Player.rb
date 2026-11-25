@@ -421,6 +421,7 @@ class Game_Player < Game_Character
       self.name[/damage\((\d+)\)/i]
         damage = $~[1].to_i
         OverworldAttacks.report_player_hit(2)
+        result = true
         next
       end
       event.start

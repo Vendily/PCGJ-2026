@@ -103,6 +103,11 @@ class Game_Event < Game_Character
     return 0 if !$PokemonGlobal.eventvars
     return $PokemonGlobal.eventvars[[@map_id, @event.id]].to_i
   end
+  
+  def screen_z(*args)
+  return ((@real_y.to_f - self.map.display_y) / Game_Map::Y_SUBPIXELS).round + Game_Map::TILE_HEIGHT if self.name[/flat/i]
+  super
+end
 
   def expired?(secs = 86_400)
     ontime = self.variable
@@ -172,7 +177,7 @@ class Game_Event < Game_Character
     if self.name[/enemy/i]
       self.name[/damage\((\d+)\)/i]
       damage = $~[1].to_i
-      OverworldAttacks.report_player_hit(2)
+      OverworldAttacks.report_player_hit(2,dir)
       return
     end
     start
