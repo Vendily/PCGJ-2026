@@ -326,14 +326,18 @@ class Game_Player < Game_Character
 
   def pbCheckEventTriggerAfterTurning; end
 
+
+
   def pbCheckEventTriggerFromDistance(triggers)
-    ret = pbTriggeredTrainerEvents(triggers)
-    ret.concat(pbTriggeredCounterEvents(triggers))
-    return false if ret.length == 0
-    ret.each do |event|
+    events = pbTriggeredTrainerEvents(triggers)
+    events.concat(pbTriggeredCounterEvents(triggers))
+    return false if events.length == 0
+    ret = false
+    events.each do |event|
       event.start
+      ret = true if event.starting
     end
-    return true
+    return ret
   end
 
   # Trigger event(s) at the same coordinates as self with the appropriate
@@ -351,7 +355,7 @@ class Game_Player < Game_Character
       next if event.jumping? || !event.over_trigger?
       next if OverworldAttacks.is_valid_weapon_target?(event)
       event.start
-      result = true
+      result = true if event.starting
     end
     return result
   end
@@ -374,7 +378,7 @@ class Game_Player < Game_Character
       next if event.jumping? || event.over_trigger?
       next if OverworldAttacks.is_valid_weapon_target?(event)
       event.start
-      result = true
+      result = true if event.starting
     end
     # If fitting event is not found
     if result == false && $game_map.counter?(new_x, new_y)
@@ -391,13 +395,12 @@ class Game_Player < Game_Character
         next if event.jumping? || event.over_trigger?
         next if OverworldAttacks.is_valid_weapon_target?(event)
         event.start
-        result = true
+        result = true if event.starting
       end
     end
     return result
   end
-
-  # Touch Event Starting Determinant
+  
   def check_event_trigger_touch(dir)
     result = false
     return result if $game_system.map_interpreter.running?
@@ -418,14 +421,14 @@ class Game_Player < Game_Character
       # If starting determinant is front event (other than jumping)
       next if event.jumping? || event.over_trigger?
       if self.name[/enemy/i]
-      self.name[/damage\((\d+)\)/i]
+        self.name[/damage\((\d+)\)/i]
         damage = $~[1].to_i
         OverworldAttacks.report_player_hit(2)
         result = true
         next
       end
       event.start
-      result = true
+      result = true if event.starting
     end
     return result
   end

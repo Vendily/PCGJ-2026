@@ -54,6 +54,7 @@ module OverworldAttacks
       if hp<=0
         event.erase
         $game_map.need_refresh = true
+        pbGiveMinorPickup(:heart) if rand(3) == 0
       end
     end
   end
@@ -133,6 +134,36 @@ def pbGetEventAtCoordinate(x,y,include_player=false,ignoreInterpreter=false)
   return nil
 end
 
+class Game_Event
+  alias _owattack_initialize initialize
+  def initialize(*args)
+    _owattack_initialize(*args)
+    if @event.name[/enemy/i]
+      list.each do |cmd|
+        next if cmd.code != 108
+        if cmd.parameters[0][/shoot\((\w+)\)/i]
+          @shoot_timer = 0
+          @shoot_weapon = $~[1]
+          break
+        end
+      end
+    end
+  end
+  alias _owattack_update update
+  def update
+    _owattack_update
+    if @shoot_timer && self.variable>0 && !self.erased?
+      @shoot_timer += @delta_t if @delta_t
+      if @shoot_timer >= 1.5
+        echoln "#{@event.id} -> shooting!"
+        @shoot_timer = 0
+        seed_data = [@x,@y,@direction,@shoot_weapon]
+        $scene.spriteset.addUserSprite(ShootWeaponSprite.new(self,seed_data,$game_map,Spriteset_Map.viewport))
+      end
+    end
+  end
+end
+
 class MinccinoMiniBoss
   HP = 2 * OverworldAttacks::FRACTIONS_PER_HEART
   
@@ -191,7 +222,7 @@ class MinccinoMiniBoss
         @attacks += 1
         @last_attack_time = @action_timer
         seed_data = [@event_minccino.x,@event_minccino.y,@event_minccino.direction]
-        $scene.spriteset.addUserSprite(BulletSeedSprite.new(@event_minccino,seed_data,$game_map,Spriteset_Map.viewport))
+        $scene.spriteset.addUserSprite(ShootWeaponSprite.new(@event_minccino,seed_data,$game_map,Spriteset_Map.viewport))
       end
     elsif @phase == :jumping
       @action_timer -= delta_t

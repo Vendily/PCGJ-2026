@@ -135,9 +135,9 @@ end
     self.need_refresh = true
     return false
   end
-
+  
   def onEvent?
-    return @map_id == $game_map.map_id && at_coordinate?($game_player.x, $game_player.y)
+    return @map_id == $game_player.map_id && at_coordinate?($game_player.x, $game_player.y)
   end
 
   def over_trigger?
@@ -278,6 +278,34 @@ end
     return true
   end
 
+  def move_type_custom
+    if @event.name[/enemy/i]
+      enemy_screen_x = @original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      enemy_screen_y = @original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      player_screen_x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
+      player_screen_y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
+      return if enemy_screen_x != player_screen_x || enemy_screen_y != player_screen_y
+    end
+    super
+  end
+
+  def check_event_trigger_after_moving
+    return if @map_id != $game_player.map_id
+    return if @trigger != 2   # Not Event Touch
+    return if $game_system.map_interpreter.running? || @starting
+    if self.name[/(?:sight|trainer)\((\d+)\)/i]
+      distance = $~[1].to_i
+      return if !pbEventCanReachPlayer?(self, $game_player, distance)
+    elsif self.name[/counter\((\d+)\)/i]
+      distance = $~[1].to_i
+      return if !pbEventFacesPlayer?(self, $game_player, distance)
+    else
+      return
+    end
+    return if jumping? || over_trigger?
+    start
+  end
+
   def update
     @to_update = should_update?(true)
     @updated_last_frame = false
@@ -286,7 +314,7 @@ end
     @moveto_happened = false
     last_moving = moving?
     super
-    $game_player.pbCheckEventTriggerFromDistance([2]) if !moving? && last_moving
+    check_event_trigger_after_moving if !moving? && last_moving
     if @need_refresh
       @need_refresh = false
       refresh
@@ -296,16 +324,8 @@ end
       @interpreter.setup(@list, @event.id, @map_id) if !@interpreter.running?
       @interpreter.update
     end
-    if @event.name[/enemy/i]
-      enemy_screen_x = @original_x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
-      enemy_screen_y = @original_y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
-      player_screen_x = $game_player.x/(Settings::ZELDA_SCREEN_WIDTH/Game_Map::TILE_WIDTH)
-      player_screen_y = $game_player.y/(Settings::ZELDA_SCREEN_HEIGHT/Game_Map::TILE_HEIGHT)
-      if enemy_screen_x != player_screen_x || enemy_screen_y != player_screen_y
-        moveto(@original_x,@original_y) if @x != @original_x || @y != @original_y
-      end
-    end
   end
+
 =begin
   def update_move
     was_jumping = jumping?

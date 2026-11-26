@@ -38,6 +38,16 @@ def pbGivePickup(pickup)
   $game_player.set_movement_type(:walking)
 end
 
+def pbGiveMinorPickup(pickup)
+  anim = PickupAnimation.new($game_player,sprintf("pickup_%s",pickup),Spriteset_Map.viewport,true)
+  $scene.spriteset.addUserSprite(anim)
+  case pickup
+  when :heart
+    $PokemonGlobal.smeargle_hp_current += OverworldAttacks::FRACTIONS_PER_HEART
+    $PokemonGlobal.smeargle_hp_current = $PokemonGlobal.smeargle_hp_current.clamp(0,$PokemonGlobal.smeargle_hp_max)
+  end
+end
+
 def pbGiveTool(tool)
   tool = GameData::Tool.get(tool)
   return false if !tool
@@ -84,7 +94,8 @@ class Game_Temp
 end
 
 class PickupAnimation
-  def initialize(event,  filename, viewport = nil, map = nil)
+  AUTO_DISPOSE_TIME = 0.5
+  def initialize(event,  filename, viewport = nil,timed = false,map = nil)
     @pickup = IconSprite.new(0, 0, viewport)
     @pickup.setBitmap("Graphics/Pictures/pickups/" + filename)
     @pickup.z = 1000
@@ -93,6 +104,7 @@ class PickupAnimation
     @event = event
     @map = (map) ? map : $game_map
     @disposed = false
+    @start_time = System.uptime if timed
   end
 
   def disposed?
@@ -117,6 +129,10 @@ class PickupAnimation
     else
       @pickup.x = @event.screen_x
       @pickup.y = @event.screen_y - (Game_Map::TILE_HEIGHT)
+    end
+    if @start_time && ((System.uptime - @start_time) >= AUTO_DISPOSE_TIME)
+      self.dispose
+      return
     end
   end
 end

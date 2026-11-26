@@ -1,33 +1,41 @@
-class BulletSeedSprite
+class ShootWeaponSprite
   MOVE_TIME = 0.1
   SEED_IMPACT_WAIT = 0.25
   def initialize(owner,seed_data,map,viewport=nil)
     @owner = owner
-    @start_x,@start_y,@direction = seed_data
+    @start_x,@start_y,@direction,@filename = seed_data
     @map = map
     @real_x = @start_x * Game_Map::REAL_RES_X
     @real_y = @start_y * Game_Map::REAL_RES_Y
     
     @dx = 0
     @dy = 0
-    
+    dir = 0
     case @direction
     when 2
       @dy = 1
     when 4
       @dx = -1
+      dir = 1
     when 6
       @dx = 1
+      dir = 2
     when 8
       @dy = -1
+      dir = 3
     end
     @seed = IconSprite.new(0,0,viewport)
     @seed.ox=8
     @seed.oy=24
-    @seed.setBitmap("Graphics/Pictures/tool_sprites/bullet_seed")
+    if @filename
+      @seed.setBitmap("Graphics/Pictures/tool_sprites/"+ @filename)
+    else
+      @seed.setBitmap("Graphics/Pictures/tool_sprites/bullet_seed")
+    end
     @seed.x = self.screen_x
     @seed.y = self.screen_y
     @seed.z = self.screen_y_ground
+    @seed.src_rect=Rect.new(0,dir*16,16,16)
     @disposed=false
     
     @phase=0
@@ -110,8 +118,8 @@ class BulletSeedSprite
         if $game_player.x == @start_x && $game_player.y == @start_y
           if $PokemonGlobal.shielding && $game_player.direction == (10-@direction)
             @phase=3
-            seed_data = [$game_player.x,$game_player.y,$game_player.direction]
-            $scene.spriteset.addUserSprite(BulletSeedSprite.new($game_player,seed_data,$game_map,Spriteset_Map.viewport))
+            seed_data = [$game_player.x,$game_player.y,$game_player.direction,@filename]
+            $scene.spriteset.addUserSprite(ShootWeaponSprite.new($game_player,seed_data,$game_map,Spriteset_Map.viewport))
           else
             OverworldAttacks.report_player_hit(1)
           end
@@ -135,5 +143,5 @@ end
 
 def pbShootBulletSeed
   seed_data = [$game_player.x,$game_player.y,$game_player.direction]
-  $scene.spriteset.addUserSprite(BulletSeedSprite.new($game_player,seed_data,$game_map,Spriteset_Map.viewport))
+  $scene.spriteset.addUserSprite(ShootWeaponSprite.new($game_player,seed_data,$game_map,Spriteset_Map.viewport))
 end
