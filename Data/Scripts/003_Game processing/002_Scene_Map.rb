@@ -195,7 +195,7 @@ class Scene_Map
          Input.trigger?(Input::BACK)
         $game_temp.interact_calling = true
       end
-      if Input.trigger?(Input::SPECIAL)
+      if Input.trigger?(Input::ACTION)
         if !$game_system.menu_disabled && !$game_player.moving?
           $game_temp.menu_calling = true
           $game_temp.menu_beep = true
@@ -206,7 +206,7 @@ class Scene_Map
       elsif Input.press?(Input::BACK) && !@last_interact
         $game_temp.tool_back_calling = true
         @back_released = false
-      elsif Input.trigger?(Input::ACTION)
+      elsif Input.trigger?(Input::SPECIAL)
         $game_temp.paint_change_calling = true if !$game_player.moving?
       elsif Input.press?(Input::F9)
         $game_temp.debug_calling = true if $DEBUG

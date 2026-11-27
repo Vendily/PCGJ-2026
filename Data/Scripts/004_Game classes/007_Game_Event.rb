@@ -43,7 +43,7 @@ class Game_Event < Game_Character
   end
 
   def start
-    @starting = true if @list.size > 1
+    @starting = true if @list.size > 1 && !@event.name[/enemy/i]
   end
 
   def erase

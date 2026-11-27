@@ -54,13 +54,21 @@ module OverworldAttacks
       if hp<=0
         event.erase
         $game_map.need_refresh = true
-        pbGiveMinorPickup(:heart) if rand(3) == 0
+        drop = get_random_drop
+        pbGiveMinorPickup(drop) if drop 
       end
     end
   end
   def is_valid_weapon_target?(event)
     return false unless event
     return event.name[/enemy/i]||event.name[/boss/i]
+  end
+  
+  def get_random_drop
+    chance = 4
+    chance = 2 if $PokemonGlobal.smeargle_hp_current <= FRACTIONS_PER_HEART
+    return :heart if rand(chance) == 0
+    return nil
   end
 end
 module BossController
@@ -96,24 +104,48 @@ def room_cleared?(event)
   return enemies_in_room.all?{|e| e.variable<=0 || e.erased?}
 end
 
-def resetable_event?(list)
+def resetable_event?(event,list)
   return false unless list
+  ret = []
   list.each do |cmd|
     next if cmd.code != 108
-    return true if cmd.parameters[0][/reset_pos/i]
+     ret.push([:pos]) if cmd.parameters[0][/reset_pos/i]
+     if cmd.parameters[0][/reset_temp_switch\((\w+)\)/i]
+      s = $~[1]
+      ret.push([:temp_switch,s])
+     end
+     if cmd.parameters[0][/reset_self_switch\((\w+)\)/i]
+      s = $~[1]
+      ret.push([:self_switch,s])
+     end
   end
-  return false
+  ret.push(:pos) if event.name[/enemy/i]
+  ret.uniq!
+  ret = nil if ret.empty?
+  return ret
 end
 
 EventHandlers.add(:on_screen_change,:reset_enemy_locations,
   proc { |last_screen_x,last_screen_y,intended_screen_x,intended_screen_y,started|
     next if started
     $game_map.events.each_value do |e|
-      next unless e.name[/enemy/i] || resetable_event?(e.list)
-      sx = e.original_x * Game_Map::REAL_RES_X - (e.original_x * Game_Map::REAL_RES_X % (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
-      sy = e.original_y * Game_Map::REAL_RES_Y - (e.original_y * Game_Map::REAL_RES_Y % (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
-      if (e.x != e.original_x || e.y != e.original_y) && (sx != intended_screen_x || sy != intended_screen_y)
-        e.moveto(e.original_x,e.original_y)
+      reset_props = resetable_event?(e,e.list)
+      next unless reset_props
+      reset_props.each do |r|
+        cmd = r[0]
+        case cmd
+        when :pos
+          sx = e.original_x * Game_Map::REAL_RES_X - (e.original_x * Game_Map::REAL_RES_X % (Settings::ZELDA_SCREEN_WIDTH * Game_Map::X_SUBPIXELS))
+          sy = e.original_y * Game_Map::REAL_RES_Y - (e.original_y * Game_Map::REAL_RES_Y % (Settings::ZELDA_SCREEN_HEIGHT * Game_Map::Y_SUBPIXELS))
+          if (e.x != e.original_x || e.y != e.original_y) && (sx != intended_screen_x || sy != intended_screen_y)
+            e.moveto(e.original_x,e.original_y)
+          end
+        when :temp_switch
+          e.setTempSwitchOff(r[1])
+        when :self_switch
+          key = [e.map_id, e.id, r[1]]
+          $game_self_switches[key] = false
+        end
       end
     end
   }
@@ -155,7 +187,6 @@ class Game_Event
     if @shoot_timer && self.variable>0 && !self.erased?
       @shoot_timer += @delta_t if @delta_t
       if @shoot_timer >= 1.5
-        echoln "#{@event.id} -> shooting!"
         @shoot_timer = 0
         seed_data = [@x,@y,@direction,@shoot_weapon]
         $scene.spriteset.addUserSprite(ShootWeaponSprite.new(self,seed_data,$game_map,Spriteset_Map.viewport))
@@ -263,10 +294,10 @@ class RosaradeBoss
     @event_head.lock_pattern = true
     @event_arm_left = left_arm
     @event_arm_left.lock_pattern = true
-    @event_arm_left.moveto(1,2)
+    @event_arm_left.moveto(61,18)
     @event_arm_right = right_arm
     @event_arm_right.lock_pattern = true
-    @event_arm_right.moveto(7,2)
+    @event_arm_right.moveto(69,18)
 
     @hp_head = HEAD_HP
     @hp_arm_left = HAND_HP
@@ -304,7 +335,7 @@ class RosaradeBoss
         @event_arm_left.animation_id = 9
         if @hp_arm_left <=0
           @event_arm_left.pattern = 1
-          x_diff,y_diff = $map_factory.getThisAndOtherPosRelativePos(@event_arm_left,@event_arm_left.map_id,1,2)
+          x_diff,y_diff = $map_factory.getThisAndOtherPosRelativePos(@event_arm_left,@event_arm_left.map_id,61,18)
           @event_arm_left.jump(x_diff,y_diff)
         end
       end
@@ -314,7 +345,7 @@ class RosaradeBoss
         @event_arm_right.animation_id = 9
         if @hp_arm_right <=0
           @event_arm_right.pattern = 1
-          x_diff,y_diff = $map_factory.getThisAndOtherPosRelativePos(@event_arm_right,@event_arm_right.map_id,7,2)
+          x_diff,y_diff = $map_factory.getThisAndOtherPosRelativePos(@event_arm_right,@event_arm_right.map_id,69,18)
           @event_arm_right.jump(x_diff,y_diff)
         end
       end

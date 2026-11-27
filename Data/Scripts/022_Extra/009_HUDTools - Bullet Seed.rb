@@ -132,11 +132,13 @@ class ShootWeaponSprite
       self.dispose
       return
     end
-    @seed.x = self.screen_x
-    @seed.y = self.screen_y
-    @seed.zoom_x = 1.0
-    @seed.zoom_y = @seed.zoom_x
-    pbDayNightTint(@seed)
+    if @map
+      @seed.x = self.screen_x
+      @seed.y = self.screen_y
+      @seed.zoom_x = 1.0
+      @seed.zoom_y = @seed.zoom_x
+      pbDayNightTint(@seed)
+    end
     @last_update_time = time_now
   end
 end

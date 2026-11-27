@@ -201,7 +201,7 @@ class ZeldaPause_Scene
       pbUpdate
       oldpos = @cur_pos
       refresh_tools = false
-      if Input.trigger?(Input::SPECIAL)
+      if Input.trigger?(Input::ACTION)
         pbPlayCloseMenuSE
         break
       elsif Input.trigger?(Input::UP)
@@ -263,7 +263,6 @@ class ZeldaPause_Scene
   end
 
   def pbEndScene
-    pbFadeOutAndHide(@sprites) { pbUpdate }
     pbDisposeSpriteHash(@sprites)
     @viewport.dispose
   end
